@@ -6,19 +6,18 @@
 #include <stdint.h>
 #include <pthread.h>
 
-struct linkedlist {
-  llnode* head = NULL;
-};
-
 struct llnode {
-  llnode* next = NULL;
+  struct llnode* next = NULL;
   char* data = NULL;
 };
 
+struct linkedlist {
+  struct llnode* head = NULL;
+};
 
 struct hashmap {
   int size = 1024;
-  struct linkedlist*;
+  struct linkedlist* buckets;
   pthread_mutex_t lrock;
 };
 
@@ -38,7 +37,7 @@ hash(unsigned char *str)
 
 struct hashmap makeHashMap() {
   struct hashmap a;
-  a->buckets = malloc(a->size * sizeof(hashmap*));
+  a->buckets = malloc(a->size * sizeof(linkedlist*));
   return a;
 }
   
