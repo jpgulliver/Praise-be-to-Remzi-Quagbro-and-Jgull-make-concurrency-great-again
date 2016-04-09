@@ -87,6 +87,17 @@ int put(char* data, struct hashmap* map) {
   return 1;
 }
 
+int main() {
+  
+  struct hashmap* map = makeHashMap();
+
+  printf("%d\n", map->size);
+
+
+  return 1;
+}
+
+
 int crawl(char *start_url,
 	  int download_workers,
 	  int parse_workers,

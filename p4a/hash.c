@@ -7,17 +7,17 @@
 #include <pthread.h>
 
 struct llnode {
-  struct llnode* next = NULL;
-  char* data = NULL;
+  struct llnode* next;
+  char* data;
 };
 
 struct linkedlist {
-  struct llnode* head = NULL;
+  struct llnode* head;
 };
 
 struct hashmap {
-  int size = 1024;
-  struct linkedlist* buckets;
+  int size;
+  struct linkedlist** buckets;
   pthread_mutex_t lrock;
 };
 
@@ -29,60 +29,76 @@ hash(unsigned char *str)
     unsigned long hash = 5381;
     int c;
 
-    while (c = *str++)
+    while ((c = *str++))
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
     return hash;
 }
 
-struct hashmap makeHashMap() {
-  struct hashmap a;
-  a->buckets = malloc(a->size * sizeof(linkedlist*));
-  return a;
+void makeHashMap(struct hashmap* a) {
+  a->size = 1024;
+  a->buckets = malloc(a->size * sizeof(struct linkedlist*));
+  int i = 0;
+  for(; i < a->size; i++) { 
+    struct linkedlist* newll = malloc(sizeof(struct linkedlist*));
+    newll->head = NULL;
+    a->buckets[i] = newll;
+  }
 }
   
 int checkIfPresent(char* data, struct hashmap* map) {
   pthread_mutex_lock(&(map->lrock));
-  unsigned long index = hash(data) % map->size;
-  ll = map->buckets[index];
-  if (ll->head == NULL) {
-    return 0;
-  }
-  else {
-    struct node* temp = ll->head;
+  int rflag = 0;
+  unsigned long index = hash((unsigned char*)data) % map->size;
+  struct linkedlist* ll = map->buckets[index];
+  if (ll->head != NULL) {
+    struct llnode* temp = ll->head;
     while (temp->next != NULL) {
       if (strcmp(temp->data, data) == 0)
-	return 1;
+	rflag = 1;
       temp = temp->next;
     }
-    if (strcmp(temp->data, data) == 0)
-      return 1;
-    return 0;
+    if (strcmp(temp->data, data) == 0) {
+      rflag = 1;
+    }
   }  
   pthread_mutex_unlock(&(map->lrock));
+  return rflag;
 }
 
 int put(char* data, struct hashmap* map) {
   pthread_mutex_lock(&(map->lrock));
-  unsigned long index = hash(page) % map->size;
-  ll = map->buckets[index];
-  struct llnode* newnode = malloc(sizeof(llnode*));
+  unsigned long index = hash((unsigned char*)data) % map->size;
+  struct linkedlist* ll = map->buckets[index];
+  struct llnode* newnode = malloc(sizeof(struct llnode*));
+  newnode->next = NULL;
   newnode->data = data;
   if (ll->head == NULL) {
     ll->head = newnode;
   }
   else {
-    struct node* temp = ll->head;
+    struct llnode* temp = ll->head;
     while (temp->next != NULL) {
       temp = temp->next;
     }
     temp->next = newnode;
   }
   pthread_mutex_unlock(&(map->lrock));
+  return 1;
 }
 
+int main() {
+  
+  //testing
+  struct hashmap map;
+  makeHashMap(&map);
+  put("helloworld\n", &map);
+  printf("%d\n", checkIfPresent("helloworld\n", &map));
+  printf("%d\n", checkIfPresent("hello\n", &map));
+  put("helloworld\n", &map);  
+  printf("%d\n", checkIfPresent("helloworld\n", &map));
+  printf("%d\n", checkIfPresent("hello\n", &map));
 
-
-
-
+  return 1;
+}
 
