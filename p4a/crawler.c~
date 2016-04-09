@@ -153,9 +153,14 @@ int crawl(char *start_url,
 	numDowloaders = download_workers;
 	numWorkers = parse_workers;
 	queueSize = queue_size;  
-
+	addToLinkQueue(NULL);
+	
 	testStack();
 
+	
+	
+	
+	  
 	return 0;
 	//return -1;
 }
