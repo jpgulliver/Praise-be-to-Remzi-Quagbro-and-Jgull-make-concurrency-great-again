@@ -19,7 +19,9 @@ int queueSize;
 
 // link queue
 Node* linkQueue;
-pthread_mutex_t linkQueueLock;
+pthread_mutex_t linkQueueLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t linkQueueHasSpace = PTHREAD_COND_INITIALIZER;
+pthread_cond_t linkQueueHasLinks = PTHREAD_COND_INITIALIZER;
 
 //////// stack functions ////////
 // returns the new head (NULL)
@@ -74,10 +76,6 @@ Node* stack_pop(Node* head) {
 		temp = head;
 	    
 		head = head->next;
-		
-		if(temp->url != NULL) {
-			free(temp->url);
-		}
 		free(temp);
 		return head;
 	} else {
@@ -93,16 +91,6 @@ char* stack_peek(Node* head) {
 		return NULL;
 	}
 
-}
-
-//////// end stack functions ////////
-
-
-void addToLinkQueue(char *link) {
-	pthread_mutex_lock(&linkQueueLock);
-	
-	
-	pthread_mutex_unlock(&linkQueueLock);
 }
 
 void testStack() {
@@ -143,6 +131,73 @@ void testStack() {
 	printf("size: %d\n", stack_count(q1));
 }
 
+//////// end stack functions ////////
+
+/*
+Node* linkQueue;
+pthread_mutex_t linkQueueLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t linkQueueHasSpace = PTHREAD_COND_INITIALIZER;
+pthread_cond_t linkQueueHasLinks = PTHREAD_COND_INITIALIZER;
+
+int stack_count(Node*);
+Node* stack_push(Node*, char*);
+Node* stack_pop(Node*);
+char* stack_peek(Node*);
+*/
+
+void addToLinkQueue(char *link) {
+	pthread_mutex_lock(&linkQueueLock);
+	
+	while(stack_count(linkQueue) == queueSize) {
+		pthread_cond_wait(&linkQueueHasSpace, &linkQueueLock);
+	}
+	
+	linkQueue = stack_push(linkQueue, link);
+	pthread_cond_signal(&linkQueueHasLinks);
+	pthread_mutex_unlock(&linkQueueLock);
+}
+
+char* getFromLinkQueue() {
+	pthread_mutex_lock(&linkQueueLock);
+	
+	while(stack_count(linkQueue) == 0) {
+		pthread_cond_wait(&linkQueueHasLinks, &linkQueueLock);
+	}
+	
+	char *link = stack_peek(linkQueue);
+	linkQueue = stack_pop(linkQueue);
+		
+	pthread_cond_signal(&linkQueueHasSpace);
+	pthread_mutex_unlock(&linkQueueLock);
+
+	printf("LINK POPPED: %s\n", link);
+	return link;
+}
+
+void makeContent() {
+	printf("GOT HERE\n");
+	
+	char* data[5];
+	data[0] = strdup("test1");
+	data[1] = strdup("this is also a test");
+	data[2] = strdup("I am still testing");
+	data[3] = strdup("linix pls");
+	data[4] = strdup("please");
+	
+	int i;
+	for(i = 0; i < 5; i++) {
+		printf("%d ADDING DATA: %s\n", i, data[i]);
+		addToLinkQueue(data[i]);
+	}
+}
+
+void consumeContent() {
+	int i;
+	for(i = 0; i < 5; i++) {
+		getFromLinkQueue();	
+	}
+}
+
 int crawl(char *start_url,
 	  int download_workers,
 	  int parse_workers,
@@ -153,8 +208,18 @@ int crawl(char *start_url,
 	numDowloaders = download_workers;
 	numWorkers = parse_workers;
 	queueSize = queue_size;  
+	
+	pthread_t p1;
+	pthread_t p2;
+	
+	pthread_create(&p2, NULL, (void *) &consumeContent, NULL);
+	pthread_create(&p1, NULL, (void *) &makeContent, NULL);
+	
+	pthread_join(p1, NULL);
+    	pthread_join(p2, NULL);
 
-	testStack();
+	printf("TESST\n");
+	//testStack();
 
 	return 0;
 	//return -1;
