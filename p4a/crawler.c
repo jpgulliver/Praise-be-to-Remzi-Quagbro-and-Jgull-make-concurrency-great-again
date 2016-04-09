@@ -174,6 +174,7 @@ char* getFromLinkQueue() {
 	return link;
 }
 
+// queue is one bigger than it should be?
 void makeContent() {
 	printf("GOT HERE\n");
 	

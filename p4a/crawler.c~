@@ -198,20 +198,6 @@ void consumeContent() {
 	}
 }
 
-void parser() {
-	while(1) {
-		char* link = getFromLinkQueue();
-		// TODO do the parsing here
-	}
-}
-
-
-void downloader() {
-	while(1) {
-	
-	}
-}
-
 int crawl(char *start_url,
 	  int download_workers,
 	  int parse_workers,
