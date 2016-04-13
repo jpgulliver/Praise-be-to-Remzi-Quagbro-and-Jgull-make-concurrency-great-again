@@ -8,7 +8,7 @@
 
 typedef struct __node
 {
-    char* url;
+    char* data;
     int count;
     struct __node* next;
 } Node;
@@ -22,6 +22,11 @@ Node* linkQueue;
 pthread_mutex_t linkQueueLock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t linkQueueHasSpace = PTHREAD_COND_INITIALIZER;
 pthread_cond_t linkQueueHasLinks = PTHREAD_COND_INITIALIZER;
+
+// page queue
+Node* pageQueue;
+pthread_mutex_t pageQueueLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t pageQueueNotEmpty = PTHREAD_COND_INITIALIZER;
 
 //////// stack functions ////////
 // returns the new head (NULL)
@@ -40,7 +45,7 @@ int stack_count(Node* head)
 }
 
 // returns the new head
-Node* stack_push(Node* head, char* url)
+Node* stack_push(Node* head, char* data)
 {
 	Node* temp;
 
@@ -49,7 +54,7 @@ Node* stack_push(Node* head, char* url)
 		temp = (Node*) malloc(sizeof(Node));	
 		assert(temp != NULL);		
 		temp->next = NULL;
-		temp->url = url;
+		temp->data = data;
 		temp->count = 1;
 		return temp;
 	}
@@ -59,7 +64,7 @@ Node* stack_push(Node* head, char* url)
 		assert(temp != NULL);
 		temp->next = head;
 		temp->count = head->count + 1;
-		temp->url = url;
+		temp->data = data;
 		head = temp;
 		return head; 
 	}
@@ -72,7 +77,7 @@ Node* stack_pop(Node* head) {
  
 	if (head != NULL)
 	{
-		value = head->url;
+		value = head->data;
 		temp = head;
 	    
 		head = head->next;
@@ -86,7 +91,7 @@ Node* stack_pop(Node* head) {
 char* stack_peek(Node* head) {
 	if (head != NULL)
 	{
-		return head->url;
+		return head->data;
 	} else {
 		return NULL;
 	}
@@ -114,7 +119,7 @@ void testStack() {
 	
 		Node* c = q1;
 		while(c != NULL) {
-			printf("VAL: %s\n", c->url);
+			printf("VAL: %s\n", c->data);
 			c = c->next;
 		}
 		
@@ -133,17 +138,8 @@ void testStack() {
 
 //////// end stack functions ////////
 
-/*
-Node* linkQueue;
-pthread_mutex_t linkQueueLock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t linkQueueHasSpace = PTHREAD_COND_INITIALIZER;
-pthread_cond_t linkQueueHasLinks = PTHREAD_COND_INITIALIZER;
-
-int stack_count(Node*);
-Node* stack_push(Node*, char*);
-Node* stack_pop(Node*);
-char* stack_peek(Node*);
-*/
+// todo:
+// parse pages to find links
 
 void addToLinkQueue(char *link) {
 	pthread_mutex_lock(&linkQueueLock);
@@ -174,8 +170,36 @@ char* getFromLinkQueue() {
 	return link;
 }
 
-// queue is one bigger than it should be?
+void addPageToQueue(char *page) {
+	pthread_mutex_lock(&pageQueueLock);
+	
+	pageQueue = stack_push(pageQueue, page);
+	pthread_cond_signal(&pageQueueNotEmpty);	
+	
+	pthread_mutex_unlock(&pageQueueLock);
+
+}
+
+// download
+char* getPageFromQueue() {
+	pthread_mutex_lock(&pageQueueLock);
+
+	while(stack_count(pageQueue) == 0) {
+		pthread_cond_wait(&pageQueueNotEmpty, &pageQueueLock);
+	}
+	
+	char *page = stack_peek(pageQueue);
+	pageQueue = stack_pop(pageQueue);
+		
+	pthread_mutex_unlock(&pageQueueLock);
+
+	printf("PAGE POPPED: %s\n", page);	
+	return page;
+}
+
+
 void makeContent() {
+	/*
 	printf("GOT HERE\n");
 	
 	char* data[5];
@@ -190,14 +214,39 @@ void makeContent() {
 		printf("%d ADDING DATA: %s\n", i, data[i]);
 		addToLinkQueue(data[i]);
 	}
+	*/
+	
+	printf("GOT HERE\n");
+	char* data[5];
+	data[0] = strdup("page 1");
+	data[1] = strdup("page 2");
+	data[2] = strdup("page 3");
+	data[3] = strdup("page page page page 4");
+	data[4] = strdup("testtesttest");
+	
+	int i;
+	for(i = 0; i < 5; i++) {
+		printf("%d ADDING PAGES: %s\n", i, data[i]);
+		addPageToQueue(data[i]);
+	}
+	
 }
 
 void consumeContent() {
+	/*
 	int i;
 	for(i = 0; i < 5; i++) {
 		getFromLinkQueue();	
 	}
+	*/
+	
+	int i;
+	for(i = 0; i < 5; i++) {
+		getPageFromQueue();	
+	}
 }
+
+
 
 int crawl(char *start_url,
 	  int download_workers,

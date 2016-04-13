@@ -8,7 +8,7 @@
 
 typedef struct __node
 {
-    char* url;
+    char* data;
     int count;
     struct __node* next;
 } Node;
@@ -40,7 +40,7 @@ int stack_count(Node* head)
 }
 
 // returns the new head
-Node* stack_push(Node* head, char* url)
+Node* stack_push(Node* head, char* data)
 {
 	Node* temp;
 
@@ -49,7 +49,7 @@ Node* stack_push(Node* head, char* url)
 		temp = (Node*) malloc(sizeof(Node));	
 		assert(temp != NULL);		
 		temp->next = NULL;
-		temp->url = url;
+		temp->data = data;
 		temp->count = 1;
 		return temp;
 	}
@@ -59,7 +59,7 @@ Node* stack_push(Node* head, char* url)
 		assert(temp != NULL);
 		temp->next = head;
 		temp->count = head->count + 1;
-		temp->url = url;
+		temp->data = data;
 		head = temp;
 		return head; 
 	}
@@ -72,7 +72,7 @@ Node* stack_pop(Node* head) {
  
 	if (head != NULL)
 	{
-		value = head->url;
+		value = head->data;
 		temp = head;
 	    
 		head = head->next;
@@ -86,7 +86,7 @@ Node* stack_pop(Node* head) {
 char* stack_peek(Node* head) {
 	if (head != NULL)
 	{
-		return head->url;
+		return head->data;
 	} else {
 		return NULL;
 	}
@@ -114,7 +114,7 @@ void testStack() {
 	
 		Node* c = q1;
 		while(c != NULL) {
-			printf("VAL: %s\n", c->url);
+			printf("VAL: %s\n", c->data);
 			c = c->next;
 		}
 		
@@ -149,6 +149,7 @@ void addToLinkQueue(char *link) {
 	pthread_mutex_lock(&linkQueueLock);
 	
 	while(stack_count(linkQueue) == queueSize) {
+
 		pthread_cond_wait(&linkQueueHasSpace, &linkQueueLock);
 	}
 	
@@ -173,6 +174,7 @@ char* getFromLinkQueue() {
 	printf("LINK POPPED: %s\n", link);
 	return link;
 }
+
 
 void makeContent() {
 	printf("GOT HERE\n");
