@@ -42,6 +42,9 @@ struct hashmap map;
 char * (*fetch_fn)(char *url);
 void (*edge_fn)(char *from, char *to);
 int done;
+int numThreadsWaiting;
+int numThreadsExited;
+pthread_mutex_t waitingLock = PTHREAD_MUTEX_INITIALIZER;
 
 // link queue
 Node* linkQueue;
@@ -236,6 +239,24 @@ int put(char* data, struct hashmap* map) {
 
 //////// end hash functions ////////
 
+void incrementExited() {
+	pthread_mutex_lock(&waitingLock);
+	numThreadsExited++;
+	pthread_mutex_unlock(&waitingLock);
+}
+
+void incrementWaiting() {
+	pthread_mutex_lock(&waitingLock);
+	numThreadsWaiting++;
+	pthread_mutex_unlock(&waitingLock);
+}
+
+void decrementWaiting() {
+	pthread_mutex_lock(&waitingLock);
+	numThreadsWaiting--;
+	pthread_mutex_unlock(&waitingLock);
+}
+
 void addToLinkQueue(char *link) {
 	pthread_mutex_lock(&linkQueueLock);
 	
@@ -243,7 +264,9 @@ void addToLinkQueue(char *link) {
 		put(link, &map);
 		
 		while(stack_count(linkQueue) == queueSize) {
+			incrementWaiting();
 			pthread_cond_wait(&linkQueueHasSpace, &linkQueueLock);
+			decrementWaiting();
 		}
 	
 		linkQueue = stack_push(linkQueue, link);
@@ -258,7 +281,9 @@ char* getFromLinkQueue() {
 	pthread_mutex_lock(&linkQueueLock);
 	
 	while(stack_count(linkQueue) == 0) {
+		incrementWaiting();
 		pthread_cond_wait(&linkQueueHasLinks, &linkQueueLock);
+		decrementWaiting();
 		
 		if(done) {
 			pthread_mutex_unlock(&linkQueueLock);
@@ -290,7 +315,9 @@ PageSourcePair* getPageFromQueue() {
 	pthread_mutex_lock(&pageQueueLock);
 
 	while(stack_count(pageQueue) == 0) {
+		incrementWaiting();
 		pthread_cond_wait(&pageQueueNotEmpty, &pageQueueLock);
+		decrementWaiting();
 		
 		if(done) {
 			pthread_mutex_unlock(&pageQueueLock);
@@ -359,6 +386,7 @@ void download() {
 	while(1) {
 		char* link = getFromLinkQueue(); 	
 		if(done) {
+			incrementExited();
 			return;
 		}
 		
@@ -372,6 +400,7 @@ void parse() {
 	while(1) {
 		PageSourcePair* pair = getPageFromQueue();
 		if(done) {
+			incrementExited();
 			return;
 		}
 		char* page = pair->page;
@@ -407,6 +436,8 @@ void test() {
 	}
 }
 
+// race condition getting numWaiting... may not actually be waiting
+
 int crawl(char *start_url,
 	  int download_workers,
 	  int parse_workers,
@@ -421,6 +452,8 @@ int crawl(char *start_url,
 	fetch_fn = _fetch_fn;
 	edge_fn = _edge_fn;
 	done = 0;
+	numThreadsWaiting = 0;
+	numThreadsExited = 0;
 	
 	//test();
 	//return 0;
@@ -450,27 +483,23 @@ int crawl(char *start_url,
 	
 	// signal that we are all done - sick strategy, bro
 	while(1) {	
-		if(stack_count(linkQueue) == 0 && stack_count(pageQueue) == 0) {
+		// all were sleeping at once, so tell them all to return
+		if(numThreadsWaiting == numParsers + numDowloaders || done == 1) {
 			done = 1;
 			pthread_cond_signal(&linkQueueHasLinks);
 			pthread_cond_signal(&linkQueueHasSpace);
 			pthread_cond_signal(&pageQueueNotEmpty);	
+		}
+		
+		// now all have exited, so we will return.
+		if(numThreadsExited == numParsers + numDowloaders) {
 			break;
 		}
 		
-		sleep(1);
-	
+		usleep(1);
 	}
 	
-	// wait for the web crawl to terminate
-	for(i = 0; i < numDowloaders; i++) {
-		pthread_join(downloaders[i], NULL);
-	}
 	free(downloaders);
-	
-	for(i = 0; i < numParsers; i++) {
-		pthread_join(parsers[i], NULL);
-	}
 	free(parsers);
 		
 	return 0;
