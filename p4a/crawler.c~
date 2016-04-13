@@ -29,8 +29,11 @@ struct hashmap {
 };
 
 int numDowloaders;
-int numWorkers;
+int numParsers;
 int queueSize;
+struct hashmap map;
+char * (*fetch_fn)(char *url);
+int done;
 
 // link queue
 Node* linkQueue;
@@ -153,18 +156,75 @@ void testStack() {
 
 //////// end stack functions ////////
 
-
 //////// hash functions ////////
 
+//http://www.cse.yorku.ca/~oz/hash.html
+//djb2 by Dan Bernstein
+unsigned long
+hash(unsigned char *str)
+{
+    unsigned long hash = 5381;
+    int c;
 
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
+    return hash;
+}
 
+void makeHashMap(struct hashmap* a) {
+  a->size = 1024;
+  a->buckets = malloc(a->size * sizeof(struct linkedlist*));
+  int i = 0;
+  for(; i < a->size; i++) { 
+    struct linkedlist* newll = malloc(sizeof(struct linkedlist*));
+    newll->head = NULL;
+    a->buckets[i] = newll;
+  }
+}
+  
+int checkIfPresent(char* data, struct hashmap* map) {
+  pthread_mutex_lock(&(map->lrock));
+  int rflag = 0;
+  unsigned long index = hash((unsigned char*)data) % map->size;
+  struct linkedlist* ll = map->buckets[index];
+  if (ll->head != NULL) {
+    struct llnode* temp = ll->head;
+    while (temp->next != NULL) {
+      if (strcmp(temp->data, data) == 0)
+	rflag = 1;
+      temp = temp->next;
+    }
+    if (strcmp(temp->data, data) == 0) {
+      rflag = 1;
+    }
+  }  
+  pthread_mutex_unlock(&(map->lrock));
+  return rflag;
+}
 
-//////// end stack functions ////////
+int put(char* data, struct hashmap* map) {
+  pthread_mutex_lock(&(map->lrock));
+  unsigned long index = hash((unsigned char*)data) % map->size;
+  struct linkedlist* ll = map->buckets[index];
+  struct llnode* newnode = malloc(sizeof(struct llnode*));
+  newnode->next = NULL;
+  newnode->data = data;
+  if (ll->head == NULL) {
+    ll->head = newnode;
+  }
+  else {
+    struct llnode* temp = ll->head;
+    while (temp->next != NULL) {
+      temp = temp->next;
+    }
+    temp->next = newnode;
+  }
+  pthread_mutex_unlock(&(map->lrock));
+  return 1;
+}
 
-
-// todo:
-// parse pages to find links
+//////// end hash functions ////////
 
 void addToLinkQueue(char *link) {
 	pthread_mutex_lock(&linkQueueLock);
@@ -174,6 +234,9 @@ void addToLinkQueue(char *link) {
 	}
 	
 	linkQueue = stack_push(linkQueue, link);
+	
+	printf("LINK PUSHED: %s\n", link);
+	
 	pthread_cond_signal(&linkQueueHasLinks);
 	pthread_mutex_unlock(&linkQueueLock);
 }
@@ -183,6 +246,11 @@ char* getFromLinkQueue() {
 	
 	while(stack_count(linkQueue) == 0) {
 		pthread_cond_wait(&linkQueueHasLinks, &linkQueueLock);
+		
+		if(done) {
+			pthread_mutex_unlock(&linkQueueLock);
+			return NULL;
+		}
 	}
 	
 	char *link = stack_peek(linkQueue);
@@ -205,12 +273,16 @@ void addPageToQueue(char *page) {
 
 }
 
-// download
 char* getPageFromQueue() {
 	pthread_mutex_lock(&pageQueueLock);
 
 	while(stack_count(pageQueue) == 0) {
 		pthread_cond_wait(&pageQueueNotEmpty, &pageQueueLock);
+		
+		if(done) {
+			pthread_mutex_unlock(&pageQueueLock);
+			return NULL;
+		}
 	}
 	
 	char *page = stack_peek(pageQueue);
@@ -218,60 +290,101 @@ char* getPageFromQueue() {
 		
 	pthread_mutex_unlock(&pageQueueLock);
 
-	printf("PAGE POPPED: %s\n", page);	
+	//printf("PAGE POPPED: [[[[[[[[[\n%s\n]]]]]]]]]\n", page);	
 	return page;
 }
 
-
-void makeContent() {
-	/*
-	printf("GOT HERE\n");
+Node* parsePage(char* page) {
+	int i, j;
+	i = 0;
 	
-	char* data[5];
-	data[0] = strdup("test1");
-	data[1] = strdup("this is also a test");
-	data[2] = strdup("I am still testing");
-	data[3] = strdup("linix pls");
-	data[4] = strdup("please");
+	Node* listOfPages = NULL;
 	
-	int i;
-	for(i = 0; i < 5; i++) {
-		printf("%d ADDING DATA: %s\n", i, data[i]);
-		addToLinkQueue(data[i]);
+	while(page[i] != '\0') {
+		if(page[i + 0] != 'l') { 
+			i++; 
+			continue;
+		}
+		if(page[i + 1] != 'i') { 
+			i++; 
+			continue;
+		}
+		if(page[i + 2] != 'n') { 
+			i++; 
+			continue;
+		}
+		if(page[i + 3] != 'k') { 
+			i++; 
+			continue;
+		}
+		if(page[i + 4] != ':') { 
+			i++; 
+			continue;
+		}
+		i = i + 5;
+		j = i;
+		
+		while(page[j] != ' ' && page[j] != '\t' && page[j] != '\0' && page[j] != '\n') {
+			j++;
+		}
+		
+		char* newLink = malloc(sizeof(char) * (j - i + 1));
+		strncpy(newLink, page + i, j - i);
+		listOfPages = stack_push(listOfPages, newLink);
+		i++;
 	}
-	*/
 	
-	printf("GOT HERE\n");
-	char* data[5];
-	data[0] = strdup("page 1");
-	data[1] = strdup("page 2");
-	data[2] = strdup("page 3");
-	data[3] = strdup("page page page page 4");
-	data[4] = strdup("testtesttest");
-	
-	int i;
-	for(i = 0; i < 5; i++) {
-		printf("%d ADDING PAGES: %s\n", i, data[i]);
-		addPageToQueue(data[i]);
-	}
-	
+	return listOfPages;	
 }
 
-void consumeContent() {
-	/*
-	int i;
-	for(i = 0; i < 5; i++) {
-		getFromLinkQueue();	
-	}
-	*/
-	
-	int i;
-	for(i = 0; i < 5; i++) {
-		getPageFromQueue();	
+void download() {
+	while(1) {
+		char* link = getFromLinkQueue(); 	
+		if(done) {
+			return;
+		}
+		
+		char *page = (*fetch_fn)(link);
+		addPageToQueue(page);
+		free(link);
 	}
 }
 
+void parse() {
+	while(1) {
+		char* page = getPageFromQueue();
+		if(done) {
+			return;
+		}
+		
+		Node* parsed = parsePage(page);
+	
+		while(parsed != NULL) {
+			char* data = stack_peek(parsed);
+			parsed = stack_pop(parsed);
+			
+			if(!checkIfPresent(data, &map)) {
+				addToLinkQueue(data);
+				put(data, &map);
+			
+			}
+		}
+	
+		free(page);
+	}
+}
 
+void test() {
+	char *page = (*fetch_fn)("pageb");
+	Node* parsed = parsePage(page);
+
+	while(parsed != NULL) {
+		char* data = stack_peek(parsed);
+		parsed = stack_pop(parsed);
+		printf("%s\n", data);
+
+	}
+}
 
 int crawl(char *start_url,
 	  int download_workers,
@@ -279,23 +392,64 @@ int crawl(char *start_url,
 	  int queue_size,
 	  char * (*_fetch_fn)(char *url),
 	  void (*_edge_fn)(char *from, char *to)) {
-	  
+	  	  
+	int i;  
 	numDowloaders = download_workers;
-	numWorkers = parse_workers;
+	numParsers = parse_workers;
 	queueSize = queue_size;  
+	fetch_fn = _fetch_fn;
+	done = 0;
 	
-	pthread_t p1;
-	pthread_t p2;
+	//test();
+	//return 0;
 	
-	pthread_create(&p2, NULL, (void *) &consumeContent, NULL);
-	pthread_create(&p1, NULL, (void *) &makeContent, NULL);
+	makeHashMap(&map);
 	
-	pthread_join(p1, NULL);
-    	pthread_join(p2, NULL);
-
-	printf("TESST\n");
-	//testStack();
-
+	// parse the first page
+	char *startPage = (*_fetch_fn)(start_url);
+	pageQueue = stack_push(pageQueue, startPage);
+	
+	// start threads for the workers
+	pthread_t* downloaders = malloc(sizeof(pthread_t) * numDowloaders); 
+	for(i = 0; i < numDowloaders; i++) {
+		if (pthread_create(&downloaders[i], NULL, (void *) &download, NULL) != 0)
+		{
+			return -1;
+		}
+	}
+	
+	pthread_t* parsers = malloc(sizeof(pthread_t) * numParsers); 
+	for(i = 0; i < numParsers; i++) {
+		if (pthread_create(&parsers[i], NULL, (void *) &parse, NULL) != 0)
+		{
+			return -1;
+		}
+	}
+	
+	// signal that we are all done
+	while(1) {	
+		if(stack_count(linkQueue) == 0 && stack_count(pageQueue) == 0) {
+			done = 1;
+			pthread_cond_signal(&linkQueueHasLinks);
+			pthread_cond_signal(&linkQueueHasSpace);
+			pthread_cond_signal(&pageQueueNotEmpty);	
+			break;
+		}
+		
+		sleep(1);
+	
+	}
+	
+	// wait for the web crawl to terminate
+	for(i = 0; i < numDowloaders; i++) {
+		pthread_join(downloaders[i], NULL);
+	}
+	free(downloaders);
+	
+	for(i = 0; i < numParsers; i++) {
+		pthread_join(parsers[i], NULL);
+	}
+	free(parsers);
+		
 	return 0;
-	//return -1;
 }
