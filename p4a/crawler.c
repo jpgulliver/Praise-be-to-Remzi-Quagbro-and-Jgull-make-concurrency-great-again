@@ -346,6 +346,12 @@ Node* parsePage(char* page) {
 			i++; 
 			continue;
 		}
+		if(i > 0) {
+			if( !(page[i - 1] == ' ' || page[i - 1] == '\n' || page[i - 1] == '\t')) {
+				i++;
+				continue;
+			}
+		}
 		if(page[i + 1] != 'i') { 
 			i++; 
 			continue;
@@ -442,14 +448,16 @@ int crawl(char *start_url,
 	error = 0;
 	numThreadsWaiting = 0;
 	numThreadsExited = 0;
+	numThreadsExited = 0;
 	makeHashMap(&map);
 	
-	// parse the first page
-	char *startPage = (*_fetch_fn)(start_url);
-	if(startPage == NULL) {
-		return -1;
-	}
-	pageQueue = stack_push(pageQueue, startPage);
+	// push
+	addToLinkQueue(start_url);
+	//char *startPage = (*_fetch_fn)(start_url);
+	//if(startPage == NULL) {
+	//	return -1;
+	//}
+	//pageQueue = stack_push(pageQueue, startPage);
 	
 	// start threads for the workers
 	pthread_t* downloaders = malloc(sizeof(pthread_t) * numDowloaders); 

@@ -1,5 +1,5 @@
 .PHONY: all
-all : libcrawler.so file_tester web_tester 
+all : libcrawler.so file_tester web_tester test
 
 file_tester : file_tester.c libcrawler.so
 	gcc -g -L. -lcrawler -lpthread file_tester.c -Wall -Werror -o file_tester
