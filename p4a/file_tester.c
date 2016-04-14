@@ -47,7 +47,7 @@ void edge(char *from, char *to) {
 
 int main(int argc, char *argv[]) {
   assert(argc == 2);
-  int rc = crawl(argv[1], 3, 5, 4, fetch, edge);
+  int rc = crawl(argv[1], 2, 6, 1, fetch, edge);
   assert(rc == 0);
   return 0;
 }

@@ -44,6 +44,7 @@ void (*edge_fn)(char *from, char *to);
 int done;
 int numThreadsWaiting;
 int numThreadsExited;
+int error;
 pthread_mutex_t waitingLock = PTHREAD_MUTEX_INITIALIZER;
 
 // link queue
@@ -270,7 +271,6 @@ void addToLinkQueue(char *link) {
 		}
 	
 		linkQueue = stack_push(linkQueue, link);
-		//printf("LINK PUSHED: %s\n", link);
 		pthread_cond_signal(&linkQueueHasLinks);			
 	}
 	
@@ -296,8 +296,6 @@ char* getFromLinkQueue() {
 		
 	pthread_cond_signal(&linkQueueHasSpace);
 	pthread_mutex_unlock(&linkQueueLock);
-
-	//printf("LINK POPPED: %s\n", link);
 	return link;
 }
 
@@ -334,8 +332,6 @@ PageSourcePair* getPageFromQueue() {
 	pair->page = page;
 		
 	pthread_mutex_unlock(&pageQueueLock);
-
-	//printf("PAGE POPPED: [[[[[[[[[\n%s\n]]]]]]]]]\n", page);	
 	return pair;
 }
 
@@ -391,6 +387,11 @@ void download() {
 		}
 		
 		char *page = (*fetch_fn)(link);
+		
+		if(page == NULL) {
+			error = 1;
+			return;
+		}
 		addPageToQueue(page, link);
 		//free(link);
 	}
@@ -424,20 +425,6 @@ void parse() {
 	}
 }
 
-void test() {
-	char *page = (*fetch_fn)("pageb");
-	Node* parsed = parsePage(page);
-
-	while(parsed != NULL) {
-		char* data = stack_peek(parsed);
-		parsed = stack_pop(parsed);
-		printf("%s\n", data);
-
-	}
-}
-
-// race condition getting numWaiting... may not actually be waiting
-
 int crawl(char *start_url,
 	  int download_workers,
 	  int parse_workers,
@@ -452,16 +439,17 @@ int crawl(char *start_url,
 	fetch_fn = _fetch_fn;
 	edge_fn = _edge_fn;
 	done = 0;
+	error = 0;
 	numThreadsWaiting = 0;
 	numThreadsExited = 0;
-	
-	//test();
-	//return 0;
-	
 	makeHashMap(&map);
 	
 	// parse the first page
 	char *startPage = (*_fetch_fn)(start_url);
+	if(startPage == NULL) {
+		return -1;
+	}
+	
 	pageQueue = stack_push(pageQueue, startPage);
 	
 	// start threads for the workers
@@ -481,10 +469,19 @@ int crawl(char *start_url,
 		}
 	}
 	
-	// signal that we are all done - sick strategy, bro
+	// signal that we are all done and check for errors - sick strategy, bro
 	while(1) {	
-		// all were sleeping at once, so tell them all to return
-		if(numThreadsWaiting == numParsers + numDowloaders || done == 1) {
+		//pthread_mutex_lock(&pageQueueLock);
+		//pthread_mutex_lock(&linkQueueLock);
+	
+		// if the tread "waiting" count is equal to the number of threads
+		// and all stacks are empty
+		// or we are already done
+		if((numThreadsWaiting == numParsers + numDowloaders 
+			&& stack_count(pageQueue) == 0
+			&& stack_count(linkQueue) == 0)
+			|| done == 1) {
+			
 			done = 1;
 			pthread_cond_signal(&linkQueueHasLinks);
 			pthread_cond_signal(&linkQueueHasSpace);
@@ -496,11 +493,18 @@ int crawl(char *start_url,
 			break;
 		}
 		
+		// a bad page was requested
+		if(error) {
+			return -1;
+		}
+	
+		//pthread_mutex_unlock(&linkQueueLock);
+		//pthread_mutex_unlock(&pageQueueLock);
+		
 		usleep(1);
 	}
 	
 	free(downloaders);
 	free(parsers);
-		
 	return 0;
 }
