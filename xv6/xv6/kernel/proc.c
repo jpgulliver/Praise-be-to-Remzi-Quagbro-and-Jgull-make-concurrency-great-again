@@ -176,54 +176,54 @@ fork(void)
 }
 
 int cloneCallback(void(*fcn)(void*), void *arg, void *stack) {
-  	int i, pid;
-  	struct proc *np;
-	
+	int i, pid;
+	struct proc *np;
+
 	if((uint)stack + PGSIZE > proc->sz) {
 		return -1;
 	}
-	
+
 	// Allocate process.
-  	if((np = allocproc()) == 0) {
-    		return -1;
-    	}
-	    	
-    	np->pgdir = proc->pgdir;
-    	np->sz = proc->sz;
-    	np->isChildThread = 1;
-    	*np->tf = *proc->tf;
-		np->userStackLocation = stack;
-    	
-    	if(proc->isChildThread) {
-    		np->parent = proc->parent;
-    	} else {
-    		np->parent = proc;
-    	}
-    	
+	if((np = allocproc()) == 0) {
+		return -1;
+	}
+
+	np->pgdir = proc->pgdir;
+	np->sz = proc->sz;
+	np->isChildThread = 1;
+	*np->tf = *proc->tf;
+	np->userStackLocation = stack;
+
+	if(proc->isChildThread) {
+		np->parent = proc->parent;
+	} else {
+		np->parent = proc;
+	}
+
 	// Clear %eax so that fork returns 0 in the child.
 	np->tf->eax = 0;
-	
+
 	for(i = 0; i < NOFILE; i++) {
 		if(proc->ofile[i]) {
 			np->ofile[i] = filedup(proc->ofile[i]);
 		}
 	}
 	np->cwd = idup(proc->cwd);
-    	
-    	// setup args and fake PC return value for user stack
-    	void* sp = stack + PGSIZE - sizeof(void*); 
-    	*(uint*)sp = (uint) arg; // *arg?
-    	sp -= sizeof(void*);
-    	*(uint*)sp = 0xffffffff;
-    	
-    	// copy the above to the kernel stack
-    	np->tf->esp = (uint) stack;
-    	memmove((void*) np->tf->esp, stack, PGSIZE);
-    	
-    	// set the pc to go to fcn
-    	np->tf->esp += PGSIZE - 2 * sizeof(void*);
-    	np->tf->eip = (uint) fcn;
-    	np->tf->ebp = np->tf->esp;
+
+	// setup args and fake PC return value for user stack
+	void* sp = stack + PGSIZE - sizeof(void*); 
+	*(uint*)sp = (uint) arg; // *arg?
+	sp -= sizeof(void*);
+	*(uint*)sp = 0xffffffff;
+
+	// copy the above to the kernel stack
+	np->tf->esp = (uint) stack;
+	memmove((void*) np->tf->esp, stack, PGSIZE);
+
+	// set the pc to go to fcn
+	np->tf->esp += PGSIZE - 2 * sizeof(void*);
+	np->tf->eip = (uint) fcn;
+	np->tf->ebp = np->tf->esp;
 
 	pid = np->pid;
 	np->state = RUNNABLE;
@@ -310,49 +310,16 @@ exit(void)
   // Parent might be sleeping in wait().
   wakeup1(proc->parent);
 
-/*
-  // Pass abandoned children to init.
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->parent == proc && !p->isChildThread){
-      p->parent = initproc;
-      if(p->state == ZOMBIE)
-        wakeup1(initproc);
-    } else if(p->parent == proc && p->isChildThread) {
-          if(p->state == ZOMBIE) {
-
-		for(fd = 0; fd < NOFILE; fd++) {
-			if(p->ofile[fd]) {
-		      		fileclose(p->ofile[fd]);
-		      		p->ofile[fd] = 0;
-		  	}
-		}
-	    
-	      	iput(p->cwd);
-	  	p->cwd = 0;
-  	}
-  	
-  	kfree(p->kstack);
-  	
-  	p->kstack = 0;
-      	p->state = UNUSED;
-      	p->pid = 0;
-      	p->parent = 0;
-      	p->name[0] = 0;
-      	p->killed = 0;
-      	
-    }
-  }
-  */
     // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->parent == proc && p->isChildThread == 0){
+	if(p->parent == proc && p->isChildThread == 0) {
       p->parent = initproc;
       if(p->state == ZOMBIE)
         wakeup1(initproc);
     }
-    else if(p->parent == proc && p->isChildThread == 1){
-      if(p->state != ZOMBIE){
-        for(fd = 0; fd < NOFILE; fd++){
+    else if(p->parent == proc && p->isChildThread == 1) { // p4
+      if(p->state != ZOMBIE) {
+        for(fd = 0; fd < NOFILE; fd++) {
           if(p->ofile[fd]){
             fileclose(p->ofile[fd]);
             p->ofile[fd] = 0;
@@ -361,6 +328,7 @@ exit(void)
         iput(p->cwd);
         p->cwd = 0;
       }
+	  
       kfree(p->kstack);
       p->kstack = 0;
       p->state = UNUSED;
@@ -371,7 +339,6 @@ exit(void)
     }
   }
   
-
   // Jump into the scheduler, never to return.
   proc->state = ZOMBIE;
   sched();
@@ -393,7 +360,7 @@ wait(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->parent != proc)
         continue;
-      if(p->isChildThread)
+      if(p->isChildThread) // p4
         continue;
         
       havekids = 1;
