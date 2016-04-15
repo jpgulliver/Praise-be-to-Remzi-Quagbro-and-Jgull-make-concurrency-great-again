@@ -93,6 +93,7 @@ userinit(void)
   p->tf->eflags = FL_IF;
   p->tf->esp = PGSIZE;
   p->tf->eip = 0;  // beginning of initcode.S
+  p->isChildThread = 0;
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
@@ -158,7 +159,7 @@ fork(void)
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
-  np->isChildThread = 0; // p4a
+  np->isChildThread = 0; // p4b
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -186,11 +187,12 @@ int cloneCallback(void(*fcn)(void*), void *arg, void *stack) {
   	if((np = allocproc()) == 0) {
     		return -1;
     	}
-    	
+	    	
     	np->pgdir = proc->pgdir;
     	np->sz = proc->sz;
     	np->isChildThread = 1;
     	*np->tf = *proc->tf;
+		np->userStackLocation = stack;
     	
     	if(proc->isChildThread) {
     		np->parent = proc->parent;
@@ -255,12 +257,16 @@ int joinCallback(void **stack) {
           kfree(p->kstack);
           p->kstack = 0;
           p->state = UNUSED;
+		  
+		  int oldPid = p->pid;
+		  *stack = p->userStackLocation;
+		  
           p->pid = 0;
           p->parent = 0;
           p->name[0] = 0;
           p->killed = 0;
           release(&ptable.lock);
-          return p->pid;;
+          return oldPid;
         }
       }
     }

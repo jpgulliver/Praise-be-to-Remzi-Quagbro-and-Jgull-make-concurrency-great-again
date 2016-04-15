@@ -31,23 +31,10 @@ main(int argc, char *argv[])
      stack = stack + (4096 - (uint)stack % PGSIZE);
 
    int arg = 42;
-   
-
-   
    int clone_pid = clone(worker, &arg, stack);
-   
-
-   
    assert(clone_pid > 0);
-   
-               printf(1, "TEST5???\n");
-
    void *join_stack;
    int join_pid = join(&join_stack);
-   
-
-   
-   
    assert(join_pid == clone_pid);
 //   printf(1, "%p\n", stack);
 //   printf(1, "%p\n", join_stack);

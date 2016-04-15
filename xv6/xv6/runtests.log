@@ -32,24 +32,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 450 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -65,7 +65,7 @@ init: starting sh
 $ tester
 tester
 TEST PASSED
-$ 
+
 
 test clone PASSED (9 of 9)
  (clone and verify that address space is shared)
@@ -88,24 +88,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 451 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -121,7 +121,7 @@ init: starting sh
 $ tester
 tester
 TEST PASSED
-
+$ 
 
 test badclone PASSED (6 of 6)
  (clone with bad stack argument)
@@ -144,24 +144,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 452 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -176,13 +176,11 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
-user/tester.c: 42 assert failed (join_pid == clone_pid)
-TEST FAILED
+TEST PASSED
 
 
-test join4 FAILED (0 of 3)
+test join4 PASSED (3 of 3)
  (join, not wait, should handle threads)
- tester failed
 
 starting thread2
 
@@ -227,24 +225,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 449 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -260,8 +258,7 @@ init: starting sh
 $ tester
 tester
 TEST PASSED
-zombie!
-$ 
+
 
 test join3 PASSED (3 of 3)
  (join should not handle child processes (forked))
@@ -284,24 +281,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 452 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -316,13 +313,11 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
-user/tester.c: 40 assert failed (join(join_stack) == clone_pid)
-TEST FAILED
+TEST PASSED
+$ 
 
-
-test join2 FAILED (0 of 6)
+test join2 PASSED (6 of 6)
  (join argument checking)
- tester failed
 
 starting clone3
 
@@ -342,24 +337,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 451 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -398,24 +393,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 451 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -431,7 +426,7 @@ init: starting sh
 $ tester
 tester
 TEST PASSED
-$ 
+
 
 test clone2 PASSED (6 of 6)
  (clone and play with the argument)
@@ -454,24 +449,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 451 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -487,7 +482,7 @@ init: starting sh
 $ tester
 tester
 TEST PASSED
-
+$
 
 test stack PASSED (8 of 8)
  (set up stack correctly (and without extra items))
@@ -596,24 +591,24 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-mkdir
-rm
-stressfs
-tester
 test
-zombie
-ln
-cat
-kill
-ls
 grep
-wc
-sh
-README
-echo
-forktest
 init
+ln
+README
+forktest
+stressfs
+wc
+echo
+ls
+zombie
+tester
+mkdir
 usertests
+kill
+rm
+cat
+sh
 balloc: first 451 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
@@ -628,13 +623,11 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
-user/tester.c: 39 assert failed (join_pid == clone_pid)
-TEST FAILED
+TEST PASSED
 
 
-test join FAILED (0 of 9)
+test join PASSED (9 of 9)
  (clone and join syscalls)
- tester failed
 
 starting thread
 
@@ -706,9 +699,8 @@ test clone PASSED (9 of 9)
 test badclone PASSED (6 of 6)
  (clone with bad stack argument)
 
-test join4 FAILED (0 of 3)
+test join4 PASSED (3 of 3)
  (join, not wait, should handle threads)
- tester failed
 
 test thread2 FAILED (0 of 7)
  (memory leaks from thread library?)
@@ -717,9 +709,8 @@ test thread2 FAILED (0 of 7)
 test join3 PASSED (3 of 3)
  (join should not handle child processes (forked))
 
-test join2 FAILED (0 of 6)
+test join2 PASSED (6 of 6)
  (join argument checking)
- tester failed
 
 test clone3 PASSED (3 of 3)
  (clone copies file descriptors, but doesn't share)
@@ -742,9 +733,8 @@ test noexit FAILED (0 of 7)
  (no exit call in thread, should trap at bogus address)
  make failed (error 2)
 
-test join FAILED (0 of 9)
+test join PASSED (9 of 9)
  (clone and join syscalls)
- tester failed
 
 test thread FAILED (0 of 10)
  (thread user library functions)
@@ -754,6 +744,6 @@ test locks FAILED (0 of 8)
  (test lock correctness)
  make failed (error 2)
 
-Passed 7 of 16 tests.
-Overall 7 of 16
-Points 35 of 100
+Passed 10 of 16 tests.
+Overall 10 of 16
+Points 53 of 100
