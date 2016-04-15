@@ -239,7 +239,9 @@ int isValidToWait(struct proc *p)
   return 0;
 }
 
+
 int joinCallback(void **stack) {
+
   struct proc *p;
   int havekids;
   
