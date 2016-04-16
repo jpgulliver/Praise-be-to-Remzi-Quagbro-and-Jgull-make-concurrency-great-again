@@ -32,25 +32,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 450 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 496 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -88,25 +88,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 451 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 496 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -144,25 +144,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 452 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 497 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -196,16 +196,47 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 		-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-cc1: warnings being treated as errors
-user/tester.c: In function ‘main’:
-user/tester.c:31: error: implicit declaration of function ‘thread_create’
-user/tester.c:33: error: implicit declaration of function ‘thread_join’
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+kill
+README
+usertests
+forktest
+rm
+test
+ln
+init
+wc
+echo
+ls
+stressfs
+mkdir
+sh
+grep
+zombie
+cat
+tester
+balloc: first 496 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/u/c/s/cs537-2/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+Could not open option rom 'sgabios.bin': No such file or directory
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+TEST PASSED
 
 
-test thread2 FAILED (0 of 7)
+test thread2 PASSED (7 of 7)
  (memory leaks from thread library?)
- make failed (error 2)
 
 starting join3
 
@@ -225,25 +256,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 449 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 495 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -258,6 +289,7 @@ init: starting sh
 $ tester
 tester
 TEST PASSED
+zombie!
 
 
 test join3 PASSED (3 of 3)
@@ -281,25 +313,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 452 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 497 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -314,7 +346,7 @@ init: starting sh
 $ tester
 tester
 TEST PASSED
-$ 
+
 
 test join2 PASSED (6 of 6)
  (join argument checking)
@@ -337,25 +369,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 451 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 497 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -393,25 +425,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 451 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 496 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -449,25 +481,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 451 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 496 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -482,7 +514,7 @@ init: starting sh
 $ tester
 tester
 TEST PASSED
-$
+$ 
 
 test stack PASSED (8 of 8)
  (set up stack correctly (and without extra items))
@@ -501,27 +533,47 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 		-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-user/tester.c:13: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘lock’
-cc1: warnings being treated as errors
-user/tester.c: In function ‘main’:
-user/tester.c:35: error: implicit declaration of function ‘lock_init’
-user/tester.c:35: error: ‘lock’ undeclared (first use in this function)
-user/tester.c:35: error: (Each undeclared identifier is reported only once
-user/tester.c:35: error: for each function it appears in.)
-user/tester.c:36: error: ‘lock2’ undeclared (first use in this function)
-user/tester.c:37: error: implicit declaration of function ‘lock_acquire’
-user/tester.c:42: error: implicit declaration of function ‘thread_create’
-user/tester.c:49: error: implicit declaration of function ‘lock_release’
-user/tester.c:68: error: implicit declaration of function ‘thread_join’
-user/tester.c: In function ‘worker’:
-user/tester.c:78: error: ‘lock’ undeclared (first use in this function)
-user/tester.c:83: error: ‘lock2’ undeclared (first use in this function)
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+kill
+README
+usertests
+forktest
+rm
+test
+ln
+init
+wc
+echo
+ls
+stressfs
+mkdir
+sh
+grep
+zombie
+cat
+tester
+balloc: first 498 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/u/c/s/cs537-2/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+Could not open option rom 'sgabios.bin': No such file or directory
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+TEST PASSED
 
 
-test size FAILED (0 of 7)
+test size PASSED (7 of 7)
  (check that address space size is updated in threads)
- make failed (error 2)
 
 starting multi
 
@@ -537,16 +589,47 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 		-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-cc1: warnings being treated as errors
-user/tester.c: In function ‘main’:
-user/tester.c:47: error: implicit declaration of function ‘thread_create’
-user/tester.c:52: error: implicit declaration of function ‘thread_join’
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+kill
+README
+usertests
+forktest
+rm
+test
+ln
+init
+wc
+echo
+ls
+stressfs
+mkdir
+sh
+grep
+zombie
+cat
+tester
+balloc: first 498 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/u/c/s/cs537-2/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+Could not open option rom 'sgabios.bin': No such file or directory
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+TEST PASSED
 
 
-test multi FAILED (0 of 8)
+test multi PASSED (8 of 8)
  (multiple threads with some depth of function calls)
- make failed (error 2)
 
 starting noexit
 
@@ -562,16 +645,48 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 		-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-cc1: warnings being treated as errors
-user/tester.c: In function ‘main’:
-user/tester.c:30: error: implicit declaration of function ‘thread_create’
-user/tester.c:33: error: implicit declaration of function ‘thread_join’
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+kill
+README
+usertests
+forktest
+rm
+test
+ln
+init
+wc
+echo
+ls
+stressfs
+mkdir
+sh
+grep
+zombie
+cat
+tester
+balloc: first 496 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/u/c/s/cs537-2/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+Could not open option rom 'sgabios.bin': No such file or directory
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+pid 4 tester: trap 14 err 5 on cpu 1 eip 0xffffffff addr 0xffffffff--kill proc
+TEST PASSED
 
 
-test noexit FAILED (0 of 7)
+test noexit PASSED (7 of 7)
  (no exit call in thread, should trap at bogus address)
- make failed (error 2)
 
 starting join
 
@@ -591,25 +706,25 @@ ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --o
 cp user/bin/tester fs/tester
 ./tools/mkfs fs.img fs
 used 29 (bit 1 ninode 26) free 29 total 1024
-test
-grep
-init
-ln
+kill
 README
+usertests
 forktest
-stressfs
+rm
+test
+ln
+init
 wc
 echo
 ls
-zombie
-tester
+stressfs
 mkdir
-usertests
-kill
-rm
-cat
 sh
-balloc: first 451 blocks have been allocated
+grep
+zombie
+cat
+tester
+balloc: first 497 blocks have been allocated
 balloc: write bitmap block at sector 28
 rm user/bin/tester
 make qemu-nox 
@@ -643,16 +758,47 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 		-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-cc1: warnings being treated as errors
-user/tester.c: In function ‘main’:
-user/tester.c:29: error: implicit declaration of function ‘thread_create’
-user/tester.c:32: error: implicit declaration of function ‘thread_join’
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+kill
+README
+usertests
+forktest
+rm
+test
+ln
+init
+wc
+echo
+ls
+stressfs
+mkdir
+sh
+grep
+zombie
+cat
+tester
+balloc: first 496 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/u/c/s/cs537-2/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+Could not open option rom 'sgabios.bin': No such file or directory
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+TEST PASSED
 
 
-test thread FAILED (0 of 10)
+test thread PASSED (10 of 10)
  (thread user library functions)
- make failed (error 2)
 
 starting locks
 
@@ -668,25 +814,47 @@ make
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
 		-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
 gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
-user/tester.c:12: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘lock’
-cc1: warnings being treated as errors
-user/tester.c: In function ‘main’:
-user/tester.c:32: error: implicit declaration of function ‘lock_init’
-user/tester.c:32: error: ‘lock’ undeclared (first use in this function)
-user/tester.c:32: error: (Each undeclared identifier is reported only once
-user/tester.c:32: error: for each function it appears in.)
-user/tester.c:36: error: implicit declaration of function ‘thread_create’
-user/tester.c:41: error: implicit declaration of function ‘thread_join’
-user/tester.c: In function ‘worker’:
-user/tester.c:55: error: implicit declaration of function ‘lock_acquire’
-user/tester.c:55: error: ‘lock’ undeclared (first use in this function)
-user/tester.c:59: error: implicit declaration of function ‘lock_release’
-make: *** [user/tester.o] Error 1
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+kill
+README
+usertests
+forktest
+rm
+test
+ln
+init
+wc
+echo
+ls
+stressfs
+mkdir
+sh
+grep
+zombie
+cat
+tester
+balloc: first 497 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/u/c/s/cs537-2/ta/tools/qemu -nographic -hdb fs.img xv6.img -smp 2
+Could not open option rom 'sgabios.bin': No such file or directory
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+TEST PASSED
 
 
-test locks FAILED (0 of 8)
+test locks PASSED (8 of 8)
  (test lock correctness)
- make failed (error 2)
 
 **********************************************************************
 Summary:
@@ -702,9 +870,8 @@ test badclone PASSED (6 of 6)
 test join4 PASSED (3 of 3)
  (join, not wait, should handle threads)
 
-test thread2 FAILED (0 of 7)
+test thread2 PASSED (7 of 7)
  (memory leaks from thread library?)
- make failed (error 2)
 
 test join3 PASSED (3 of 3)
  (join should not handle child processes (forked))
@@ -721,29 +888,24 @@ test clone2 PASSED (6 of 6)
 test stack PASSED (8 of 8)
  (set up stack correctly (and without extra items))
 
-test size FAILED (0 of 7)
+test size PASSED (7 of 7)
  (check that address space size is updated in threads)
- make failed (error 2)
 
-test multi FAILED (0 of 8)
+test multi PASSED (8 of 8)
  (multiple threads with some depth of function calls)
- make failed (error 2)
 
-test noexit FAILED (0 of 7)
+test noexit PASSED (7 of 7)
  (no exit call in thread, should trap at bogus address)
- make failed (error 2)
 
 test join PASSED (9 of 9)
  (clone and join syscalls)
 
-test thread FAILED (0 of 10)
+test thread PASSED (10 of 10)
  (thread user library functions)
- make failed (error 2)
 
-test locks FAILED (0 of 8)
+test locks PASSED (8 of 8)
  (test lock correctness)
- make failed (error 2)
 
-Passed 10 of 16 tests.
-Overall 10 of 16
-Points 53 of 100
+Passed 16 of 16 tests.
+Overall 16 of 16
+Points 100 of 100

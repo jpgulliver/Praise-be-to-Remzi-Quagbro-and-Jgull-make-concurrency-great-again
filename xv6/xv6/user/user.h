@@ -25,6 +25,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+
+// p4
 int clone(void(*fcn)(void*), void *arg, void*stack);
 int join(void **stack);
 
@@ -41,6 +43,13 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+// p4
+int thread_create(void (*)(void*), void *);
+int thread_join();
+void lock_acquire(lock_t *);
+void lock_release(lock_t *);
+void lock_init(lock_t *);
 
 #endif // _USER_H_
 

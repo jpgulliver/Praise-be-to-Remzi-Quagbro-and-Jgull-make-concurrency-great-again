@@ -93,7 +93,8 @@ userinit(void)
   p->tf->eflags = FL_IF;
   p->tf->esp = PGSIZE;
   p->tf->eip = 0;  // beginning of initcode.S
-  p->isChildThread = 0;
+  
+  p->isChildThread = 0; // p4
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
@@ -120,13 +121,14 @@ growproc(int n)
   }
   proc->sz = sz;
  
-  acquire(&ptable.lock);
+  acquire(&ptable.lock); // we probably need this? idk
   
+  // find all relevant child threads and also update their sz
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {  
     if( (p->isChildThread && (p->parent == proc || (proc->isChildThread && p->parent == proc->parent))) || 
     (proc->isChildThread && proc->parent == p))
     {
-      p->sz = sz;
+        p->sz = sz;
     }
   }
 
@@ -159,7 +161,7 @@ fork(void)
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
-  np->isChildThread = 0; // p4b
+  np->isChildThread = 0; // p4
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -263,7 +265,6 @@ int joinCallback(void **stack) {
 		  
           p->pid = 0;
           p->parent = 0;
-          p->name[0] = 0;
           p->killed = 0;
           release(&ptable.lock);
           return oldPid;
@@ -317,7 +318,11 @@ exit(void)
       if(p->state == ZOMBIE)
         wakeup1(initproc);
     }
+	
+	// do the same entire thing but for threads
     else if(p->parent == proc && p->isChildThread == 1) { // p4
+	
+	// filesystem stuff copied from above
       if(p->state != ZOMBIE) {
         for(fd = 0; fd < NOFILE; fd++) {
           if(p->ofile[fd]){
@@ -325,17 +330,18 @@ exit(void)
             p->ofile[fd] = 0;
           }
         }
+		
         iput(p->cwd);
         p->cwd = 0;
-      }
-	  
-      kfree(p->kstack);
-      p->kstack = 0;
-      p->state = UNUSED;
-      p->pid = 0;
-      p->parent = 0;
-      p->name[0] = 0;
-      p->killed = 0;
+     }
+	 
+	 // free as in join()
+     kfree(p->kstack);
+     p->kstack = 0;
+     p->state = UNUSED;
+     p->pid = 0;
+     p->parent = 0;
+     p->killed = 0;
     }
   }
   

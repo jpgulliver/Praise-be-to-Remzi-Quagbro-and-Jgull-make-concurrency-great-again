@@ -11,4 +11,8 @@ typedef uint pde_t;
 #define NULL (0)
 #endif
 
+typedef struct __lock{
+   uint value;
+} lock_t;
+
 #endif //_TYPES_H_

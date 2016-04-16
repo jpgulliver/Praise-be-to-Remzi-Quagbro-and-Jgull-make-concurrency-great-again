@@ -2,6 +2,9 @@
 #include "stat.h"
 #include "user.h"
 #include "param.h"
+#include "x86.h"
+
+#define PGSIZE 4096
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
@@ -88,3 +91,57 @@ malloc(uint nbytes)
         return 0;
   }
 }
+
+// it would't compile unless it was here so i put all the thread library functions in here?
+
+// returns the pid
+int thread_create(void (*start_routine)(void*), void *arg) {
+	void *top = malloc((uint) (PGSIZE * 2));
+	void *stack;
+	
+	if((uint) top % PGSIZE != 0) {
+		stack = top + (PGSIZE - ((uint)top % PGSIZE) );
+	} else {
+		stack = top;
+	}
+	
+	int pid = clone(start_routine, arg, stack);
+	
+	if(pid < 0) {
+		free(top);
+		return -1;
+	}
+	
+	return pid;
+}
+
+// returns the pid
+int thread_join() {
+	void *stack;
+	int pid = join(&stack);
+	free(stack);
+	return pid;
+}
+
+void lock_acquire(lock_t * lock) {
+  while(xchg(&lock->value, 1) != 0)
+    ;	// spin - I write spin loops like Remzi
+}
+
+void lock_release(lock_t * lock) {
+	lock->value = 0;
+}
+
+void lock_init(lock_t * lock) {
+	lock->value = 0;
+}
+
+
+
+
+
+
+
+
+
+
